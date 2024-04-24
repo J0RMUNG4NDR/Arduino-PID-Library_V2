@@ -1,6 +1,6 @@
-#ifndef PID_v1_h
-#define PID_v1_h
-#define LIBRARY_VERSION	1.2.1
+#ifndef PID_v2_h
+#define PID_v2_h
+#define LIBRARY_VERSION	2.0
 
 class PID
 {
@@ -18,7 +18,7 @@ class PID
 
   //commonly used functions **************************************************************************
     PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
-        double, double, double, int, int);//   Setpoint.  Initial tuning parameters are also set here.
+        double, double, double, int, int, double);//   Setpoint.  Initial tuning parameters are also set here.
                                           //   (overload for specifying proportional mode)
 
     PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
@@ -48,9 +48,9 @@ class PID
 										  //   means the output will increase when error is positive. REVERSE
 										  //   means the opposite.  it's very unlikely that this will be needed
 										  //   once it is set in the constructor.
-    void SetSampleTime(int);              // * sets the frequency, in Milliseconds, with which 
-                                          //   the PID calculation is performed.  default is 100
-										  
+  void SetSampleTime(int);              // * sets the frequency, in Milliseconds, with which 
+                                        //   the PID calculation is performed.  default is 100
+  void SetAlpha(double, double);        // Calculate the necessary alpha with a given sample time and cutoff frequency
 										  
 										  
   //Display functions ****************************************************************
@@ -85,6 +85,9 @@ class PID
 	unsigned long SampleTime;
 	double outMin, outMax;
 	bool inAuto, pOnE;
+  double alpha;
+	double myCutoff_freq;
+	double avg_dInput;
 };
 #endif
 

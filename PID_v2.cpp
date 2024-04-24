@@ -11,14 +11,14 @@
   #include "WProgram.h"
 #endif
 
-#include <PID_v1.h>
+#include <PID_v2.h>
 
 /*Constructor (...)*********************************************************
  *    The parameters specified here are those for for which we can't set up
  *    reliable defaults, so we need to have the user set them.
  ***************************************************************************/
 PID::PID(double* Input, double* Output, double* Setpoint,
-        double Kp, double Ki, double Kd, int POn, int ControllerDirection)
+        double Kp, double Ki, double Kd, int POn, int ControllerDirection, double cutoff_freq)
 {
     myOutput = Output;
     myInput = Input;
@@ -29,6 +29,9 @@ PID::PID(double* Input, double* Output, double* Setpoint,
 												//the arduino pwm limits
 
     SampleTime = 100;							//default Controller Sample Time is 0.1 seconds
+    
+    myCutoff_freq = cutoff_freq;
+    PID::SetAlpha(SampleTime/1e3, myCutoff_freq);
 
     PID::SetControllerDirection(ControllerDirection);
     PID::SetTunings(Kp, Ki, Kd, POn);
@@ -65,8 +68,10 @@ bool PID::Compute()
       /*Compute all the working error variables*/
       double input = *myInput;
       double error = *mySetpoint - input;
-      double dInput = (input - lastInput);
+      double dInput = alpha*(input - lastInput) + (1-alpha)*avg_dInput;
       outputSum+= (ki * error);
+
+      avg_dInput = dInput;
 
       /*Add Proportional on Measurement, if P_ON_M is specified*/
       if(!pOnE) outputSum-= kp * dInput;
@@ -209,6 +214,18 @@ void PID::SetControllerDirection(int Direction)
       kd = (0 - kd);
    }
    controllerDirection = Direction;
+}
+
+/* SetAlpha(...)
+ * calculate the necessary alpha with a given sample time and cutoff frequency
+ * Source: https://dsp.stackexchange.com/questions/40462/exponential-moving-average-cut-off-frequency
+  */
+void PID::SetAlpha(double dt, double f_cutoff)
+{ 
+  double fs = 1.0 / dt; // requires dt to be in seconds
+  double omega_cutoff = (3.141592 * f_cutoff) / (fs / 2.0);
+
+  alpha = cos(omega_cutoff) - 1.0 + sqrt(sq(cos(omega_cutoff)) - 4.0*cos(omega_cutoff) + 3.0);
 }
 
 /* Status Funcions*************************************************************
