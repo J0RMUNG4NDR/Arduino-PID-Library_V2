@@ -42,7 +42,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
 /*Constructor (...)*********************************************************
  *    To allow backwards compatability for v1.1, or for people that just want
  *    to use Proportional on Error without explicitly saying so
- ***************************************************************************/
+ **************************************************************************
 
 PID::PID(double* Input, double* Output, double* Setpoint,
         double Kp, double Ki, double Kd, int ControllerDirection)
@@ -50,6 +50,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
 {
 
 }
+*/
 
 
 /* Compute() **********************************************************************
@@ -145,6 +146,7 @@ void PID::SetSampleTime(int NewSampleTime)
       ki *= ratio;
       kd /= ratio;
       SampleTime = (unsigned long)NewSampleTime;
+	  PID::calc_alpha(SampleTime/1e3, myCutoff_freq);
    }
 }
 
@@ -222,10 +224,18 @@ void PID::SetControllerDirection(int Direction)
   */
 void PID::SetAlpha(double dt, double f_cutoff)
 { 
-  double fs = 1.0 / dt; // requires dt to be in seconds
-  double omega_cutoff = (3.141592 * f_cutoff) / (fs / 2.0);
-
-  alpha = cos(omega_cutoff) - 1.0 + sqrt(sq(cos(omega_cutoff)) - 4.0*cos(omega_cutoff) + 3.0);
+  if f_cutoff == 0)
+  {
+	  // effectively disables averaging
+	  alpha = 1;
+  }
+  else
+  {
+	  double fs = 1.0 / dt; // requires dt to be in seconds
+	  double omega_cutoff = (3.141592 * f_cutoff) / (fs / 2.0);
+	  alpha = cos(omega_cutoff) - 1.0 + sqrt(sq(cos(omega_cutoff)) - 4.0*cos(omega_cutoff) + 3.0);
+  }
+  
 }
 
 /* Status Funcions*************************************************************
