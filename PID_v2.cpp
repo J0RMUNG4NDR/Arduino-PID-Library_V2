@@ -146,7 +146,7 @@ void PID::SetSampleTime(int NewSampleTime)
       ki *= ratio;
       kd /= ratio;
       SampleTime = (unsigned long)NewSampleTime;
-	  PID::calc_alpha(SampleTime/1e3, myCutoff_freq);
+	  PID::SetAlpha(SampleTime/1e3, myCutoff_freq);
    }
 }
 
@@ -224,7 +224,7 @@ void PID::SetControllerDirection(int Direction)
   */
 void PID::SetAlpha(double dt, double f_cutoff)
 { 
-  if f_cutoff == 0)
+  if (f_cutoff == 0)
   {
 	  // effectively disables averaging
 	  alpha = 1;
